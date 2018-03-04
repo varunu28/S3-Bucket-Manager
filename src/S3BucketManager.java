@@ -1,8 +1,10 @@
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.Bucket;
+import com.amazonaws.services.s3.model.CreateBucketRequest;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -33,12 +35,9 @@ public class S3BucketManager {
     }
 
     private List<String> getCredentials() throws IOException {
-
         File file = new File(FILE_NAME);
-
         BufferedReader br = new BufferedReader(new FileReader(file));
         String line;
-
         List<String> credentials = new ArrayList<>();
 
         while ((line = br.readLine()) != null) {
@@ -49,11 +48,36 @@ public class S3BucketManager {
     }
 
     public void listAllBuckets() {
-
         List<Bucket> buckets = s3Client.listBuckets();
-
+        System.out.println("List of buckets: ");
         for (Bucket b : buckets) {
             System.out.println(b.getName());
+        }
+    }
+
+    public void createBucket(String bucketName) {
+        try {
+            if (s3Client.doesBucketExistV2(bucketName)) {
+                System.out.println("Bucket already exists");
+            } else {
+                s3Client.createBucket(new CreateBucketRequest(bucketName));
+            }
+        } catch (AmazonServiceException e) {
+            System.out.println(e.getErrorMessage());
+        }
+    }
+
+    public void deleteBucket(String bucketName) {
+        try {
+            if (s3Client.doesBucketExistV2(bucketName)) {
+                System.out.println("Deleting " + bucketName);
+                s3Client.deleteBucket(bucketName);
+            }
+            else {
+                System.out.println("Bucket does not exist");
+            }
+        } catch (AmazonServiceException e) {
+            System.out.println(e.getErrorMessage());
         }
     }
 }
