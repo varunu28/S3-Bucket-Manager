@@ -1,4 +1,4 @@
 .idea/*
 AWS-S3-Demo.iml
 out/*
-src/credentials.txt
+src/*.txt
